@@ -1,4 +1,4 @@
-import numpy as _np           # Nice data structures and math operations
+import numpy as _np
 import pandas as _pd
 
 class Song:
@@ -7,7 +7,7 @@ class Song:
         self.fs = fs
         self.fref= fref
         self.bpm = bpm
-        self.df = pd.DataFrame(columns=['start', 'note',
+        self.df = _pd.DataFrame(columns=['start', 'note',
                                         'duration', 'intensity'])  
         return
         
@@ -18,11 +18,11 @@ class Song:
         return 4*(1/self.bpm)*60
     
     def __NoteToFreq(note, fref):
-        return fref*np.power(2, note/12)
+        return fref*_np.power(2, note/12)
     
     # Duration and start in bars
     def AddNote(self, start, note, duration=0.25, intensity=0.1):
-        newNote = pd.DataFrame([[start, note, duration, intensity]],
+        newNote = _pd.DataFrame([[start, note, duration, intensity]],
                                 columns=['start', 'note',
                                          'duration', 'intensity'])
         
@@ -37,9 +37,9 @@ class Song:
         df = self.df.copy()
         barSamples = self.__BarToSamples()
         arraySize = (df['start'] + df['duration']).max()*barSamples
-        arraySize = np.ceil(arraySize).astype(np.int) + 1
+        arraySize = _np.ceil(arraySize).astype(_np.int) + 1
         
-        x = np.zeros(arraySize)
+        x = _np.zeros(arraySize)
         
         df['note'] = df['note'].apply(Song.__NoteToFreq, args=(self.fref,))
         df['start'] = df['start']*barSamples
@@ -50,7 +50,7 @@ class Song:
                                        self.fs,
                                        note['duration'],
                                        note['intensity'])
-            start = np.floor(note['start']).astype(np.int)
+            start = _np.floor(note['start']).astype(_np.int)
             end = start + subArray.size
                         
             x[start:end] += subArray
@@ -89,14 +89,14 @@ class Instrument(object):
             
         times, amps = zip(*envelope)
         
-        xvals = np.linspace(0, times[-1], fs*times[-1])
-        env = np.interp(xvals, times, amps)
+        xvals = _np.linspace(0, times[-1], fs*times[-1])
+        env = _np.interp(xvals, times, amps)
         
-        return np.power(10, env/20)
+        return _np.power(10, env/20)
         
         
     def __ApplyEnvelope(x, envelope):
-        env = np.zeros(x.shape)
+        env = _np.zeros(x.shape)
         
         maxBound = min(len(envelope), env.shape[0])
         
@@ -114,11 +114,11 @@ class SineWave(Instrument):
     # Duration in seconds
     def playFunc(self, f, fs, duration, intensity):
         samples = fs*duration
-        t = np.linspace(0,duration, samples)
+        t = _np.linspace(0,duration, samples)
 
-        w = 2*np.pi*f
+        w = 2*_np.pi*f
         
-        return intensity*np.sin(w*t)
+        return intensity*_np.sin(w*t)
 
 
 class SawTooth(Instrument):
@@ -126,7 +126,7 @@ class SawTooth(Instrument):
     # Duration in seconds
     def playFunc(self, f, fs, duration, intensity):
         samples = fs*duration
-        t = np.linspace(0,duration, samples)
+        t = _np.linspace(0,duration, samples)
         
         T = 1/f
         
@@ -141,12 +141,12 @@ class SquareWave(Instrument):
     # Duration in seconds
     def playFunc(self, f, fs, duration, intensity):
         samples = fs*duration
-        t = np.linspace(0,duration, samples)
+        t = _np.linspace(0,duration, samples)
         
         T = 1/f
         
         # Same as Sawtooth but rounded to integer 0/1
-        return intensity*np.round((t % T)/T)
+        return intensity*_np.round((t % T)/T)
 
 
 
@@ -155,9 +155,9 @@ class TriangleWave(Instrument):
     # Duration in seconds
     def playFunc(self, f, fs, duration, intensity):
         samples = fs*duration
-        t = np.linspace(0,duration, samples)
+        t = _np.linspace(0,duration, samples)
         
         T = 1/f
         
         # 2*abs(square wave - sawtooth)
-        return 2*intensity*abs(np.round((t % T)/T) - (t % T)/T)
+        return 2*intensity*abs(_np.round((t % T)/T) - (t % T)/T)
