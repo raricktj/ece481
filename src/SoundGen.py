@@ -108,6 +108,9 @@ class Instrument(object):
     def OscillatorView(self):
         return self.playFunc(1, 100, 1, 1)
 
+    def EnvelopeView(self):
+        return Instrument.__CompileEnvelope(self.__envelope, 1000)
+
 
 class SineWave(Instrument):
 
